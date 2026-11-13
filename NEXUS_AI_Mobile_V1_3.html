@@ -1,0 +1,131 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#080d1b">
+<title>NEXUS AI V1.3 — Live Paper Lab</title>
+<style>
+:root{--bg:#080d1b;--panel:#111a2d;--panel2:#0d1526;--line:#24314c;--text:#edf3ff;--muted:#9aabc7;--blue:#61a8ff;--purple:#a58bff;--green:#39d6a0;--red:#ff7189;--amber:#f4c66a}
+*{box-sizing:border-box}body{margin:0;background:radial-gradient(circle at 90% 0%,#1a2450 0,transparent 34%),var(--bg);color:var(--text);font:15px system-ui,-apple-system,Segoe UI,sans-serif}
+.wrap{max-width:780px;margin:auto;padding:18px 14px 40px}.top{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:18px}.brand{font-weight:850;letter-spacing:2px;font-size:20px}.brand span{color:var(--blue)}.tag{font-size:10px;color:#b9c9e5;border:1px solid var(--line);padding:6px 9px;border-radius:20px;white-space:nowrap}
+h1{font-size:24px;margin:12px 0 4px}.sub{color:var(--muted);font-size:13px;margin-bottom:18px}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}.card{background:linear-gradient(145deg,var(--panel),var(--panel2));border:1px solid var(--line);border-radius:16px;padding:14px;margin-bottom:11px;min-width:0}.label{font-size:12px;color:var(--muted)}.big{font-size:24px;font-weight:800;margin-top:5px}.positive{color:var(--green)}.negative{color:var(--red)}.amber{color:var(--amber)}
+.section{font-size:15px;font-weight:750;margin:18px 0 9px}.row{display:flex;justify-content:space-between;align-items:center;gap:10px}.asset{font-weight:700}.small{font-size:12px;color:var(--muted)}.pill{font-size:11px;border-radius:20px;padding:5px 8px;background:#1a2a43;color:#bcd6ff}
+button,select{font:inherit;color:var(--text);background:#172541;border:1px solid #344769;border-radius:10px;padding:10px 12px}button{cursor:pointer}button.primary{background:linear-gradient(90deg,#277fe8,#7657df);border:0;font-weight:750}button.buy{background:#123b37;border-color:#216a5c;color:#83f0cb}button.sell{background:#402234;border-color:#79364e;color:#ffafc0}button:disabled{opacity:.55;cursor:wait}
+select{width:100%;margin:6px 0 10px}.signals{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}.signal{background:#0b1425;border:1px solid var(--line);border-radius:12px;padding:10px;text-align:center}.signal b{display:block;font-size:14px;margin-top:4px}
+.actions{display:flex;gap:8px}.actions button{flex:1}.note{font-size:12px;line-height:1.5;color:var(--muted)}.trade{border-top:1px solid var(--line);padding:10px 0}.footer{text-align:center;color:#7486a5;font-size:11px;margin-top:18px}.status{display:inline-flex;align-items:center;gap:6px}.dot{width:7px;height:7px;border-radius:50%;background:var(--amber);display:inline-block}.dot.live{background:var(--green)}.dot.err{background:var(--red)}.price{font-variant-numeric:tabular-nums}
+@media(max-width:420px){.big{font-size:21px}.wrap{padding:14px 11px 32px}.tag{font-size:9px}}
+</style>
+</head>
+<body><main class="wrap">
+<header class="top"><div class="brand">NEXUS<span> AI</span></div><div class="tag">MOBILE PAPER LAB · V1.3</div></header>
+<h1>Market Intelligence</h1><div class="sub">Live public market data where available · virtual trading only.</div>
+<div class="grid">
+ <section class="card"><div class="label">Virtual balance</div><div class="big price" id="balance">$10,000.00</div><div class="small">Starting paper balance</div></section>
+ <section class="card"><div class="label">Paper trades</div><div class="big" id="positions">0</div><div class="small">Recorded simulated trades</div></section>
+</div>
+<div class="section">Market watch</div>
+<section class="card">
+ <div class="row"><div><div class="asset">BTC / USD</div><div class="small status"><i class="dot" id="btcDot"></i><span id="btcStatus">Loading public data…</span></div></div><div style="text-align:right"><div class="asset price" id="btc">—</div><div class="small" id="btcTime">Not loaded</div></div></div>
+ <hr style="border:0;border-top:1px solid var(--line);margin:13px 0">
+ <div class="row"><div><div class="asset">EUR / USD</div><div class="small status"><i class="dot" id="eurDot"></i><span id="eurStatus">Loading reference rate…</span></div></div><div style="text-align:right"><div class="asset price" id="eur">—</div><div class="small" id="eurTime">Not loaded</div></div></div>
+</section>
+<div class="section">Indicator analysis</div>
+<section class="card">
+ <label class="label" for="market">Choose market</label>
+ <select id="market"><option value="BTCUSD">BTC/USD · Crypto (1-hour candles)</option><option value="EURUSD">EUR/USD · Forex (daily reference rates)</option></select>
+ <div class="signals">
+  <div class="signal"><span class="small">EMA 20 / 50</span><b id="ema">—</b></div>
+  <div class="signal"><span class="small">RSI (14)</span><b id="rsi">—</b></div>
+  <div class="signal"><span class="small">MACD</span><b id="macd">—</b></div>
+ </div>
+ <div class="row" style="margin:14px 0 8px"><span class="label">Rule-based educational signal</span><span class="pill" id="signal">WAIT</span></div>
+ <p class="note" id="explain">Load market candles to calculate indicators. A signal is a learning aid, not a prediction or investment recommendation.</p>
+ <button class="primary" id="refresh" style="width:100%" onclick="loadAll()">Refresh live data & analysis</button>
+ <p class="note" id="dataNote" style="margin-bottom:0">BTC data: public Binance market endpoint. EUR/USD: Frankfurter reference-rate history (daily, not a real-time FX quote). Internet connection required.</p>
+</section>
+<div class="section">Paper trading</div>
+<section class="card">
+ <div class="row"><span class="label">Trade size (virtual USD)</span><b id="sizeText">$100</b></div>
+ <input id="size" type="range" min="10" max="1000" step="10" value="100" style="width:100%;accent-color:#61a8ff">
+ <div class="actions" style="margin-top:10px"><button class="buy" onclick="trade('BUY')">Paper Buy</button><button class="sell" onclick="trade('SELL')">Paper Sell</button></div>
+ <p class="note" style="margin-bottom:0">Paper trades only record the selected side, market and virtual amount. They do not open a position with a broker or execute real orders.</p>
+</section>
+<div class="row"><div class="section" style="margin:8px 0">Trade history</div><button onclick="resetLab()">Reset lab</button></div>
+<section class="card" id="history"><div class="small">No paper trades yet.</div></section>
+<div class="footer">NEXUS AI V1.3 · Educational prototype · No broker connection · No real-money trading</div>
+</main>
+<script>
+let balance=10000,trades=0,prices={BTCUSD:null,EURUSD:null},series={BTCUSD:[],EURUSD:[]},lastSignal='WAIT';
+const money=n=>'$'+Number(n).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2});
+const fmt=(n,d=2)=>Number(n).toLocaleString('en-US',{minimumFractionDigits:d,maximumFractionDigits:d});
+function setStatus(prefix,kind,msg){document.getElementById(prefix+'Dot').className='dot '+(kind==='live'?'live':kind==='err'?'err':'');document.getElementById(prefix+'Status').textContent=msg}
+function ema(values,period){if(values.length<period)return null;let k=2/(period+1),v=values.slice(0,period).reduce((a,b)=>a+b,0)/period;for(let i=period;i<values.length;i++)v=values[i]*k+v*(1-k);return v}
+function rsi(values,p=14){if(values.length<=p)return null;let gains=0,losses=0;for(let i=values.length-p;i<values.length;i++){let d=values[i]-values[i-1];if(d>0)gains+=d;else losses-=d}if(losses===0)return 100;let rs=(gains/p)/(losses/p);return 100-100/(1+rs)}
+function macd(values){if(values.length<35)return null;return ema(values,12)-ema(values,26)}
+function analyze(){
+ const key=document.getElementById('market').value, vals=series[key];
+ if(!vals||vals.length<35){document.getElementById('explain').textContent='Not enough candle history was received to calculate the selected indicators.';return}
+ const e20=ema(vals,20),e50=ema(vals,50),e200=ema(vals,200),rv=rsi(vals),mv=macd(vals);
+ const trend=e20>e50?'Bullish':'Bearish',mac=mv>=0?'Positive':'Negative';
+ document.getElementById('ema').textContent=trend;
+ document.getElementById('rsi').textContent=fmt(rv,1);
+ document.getElementById('macd').textContent=mac;
+ let sig='HOLD';
+ if(e20>e50 && mv>0 && rv>=40 && rv<=68) sig='BUY';
+ if(e20<e50 && mv<0 && rv>=32 && rv<=60) sig='SELL';
+ lastSignal=sig;
+ const pill=document.getElementById('signal');pill.textContent=sig;pill.style.color=sig==='BUY'?'#83f0cb':sig==='SELL'?'#ffafc0':'#bcd6ff';
+ const px=prices[key];
+ document.getElementById('explain').textContent='Calculated from '+vals.length+' received closing prices. EMA20 '+fmt(e20,5)+'; EMA50 '+fmt(e50,5)+(e200?' ; EMA200 '+fmt(e200,5):'')+'. Rule: EMA20/50 trend + MACD direction + RSI filter. This is not machine learning and does not predict profit.';
+}
+
+async function getJSON(url){const r=await fetch(url,{cache:'no-store'});if(!r.ok)throw new Error('HTTP '+r.status);return r.json()}
+async function loadBTC(){
+ setStatus('btc','wait','Fetching hourly candles…');
+ const d=await getJSON('https://api.binance.com/api/v3/klines?symbol=BTCUSDT&interval=1h&limit=250');
+ series.BTCUSD=d.map(x=>Number(x[4]));
+ prices.BTCUSD=Number(d[d.length-1][4]);
+ document.getElementById('btc').textContent='$'+fmt(prices.BTCUSD,2);
+ document.getElementById('btcTime').textContent='Latest candle close · UTC '+new Date(d[d.length-1][6]).toLocaleString();
+ setStatus('btc','live','Public BTC data loaded');
+}
+async function loadEUR(){
+ setStatus('eur','wait','Fetching daily reference rates…');
+ const end=new Date(),start=new Date(Date.now()-260*86400000);
+ const iso=d=>d.toISOString().slice(0,10);
+ const url='https://api.frankfurter.app/'+iso(start)+'..'+iso(end)+'?from=EUR&to=USD';
+ const d=await getJSON(url);
+ const dates=Object.keys(d.rates).sort();
+ series.EURUSD=dates.map(k=>Number(d.rates[k].USD));
+ prices.EURUSD=series.EURUSD[series.EURUSD.length-1];
+ document.getElementById('eur').textContent=fmt(prices.EURUSD,5);
+ document.getElementById('eurTime').textContent='Reference rate · '+dates[dates.length-1];
+ setStatus('eur','live','Daily reference data loaded');
+}
+async function loadAll(){
+ const btn=document.getElementById('refresh');btn.disabled=true;btn.textContent='Loading…';
+ const results=await Promise.allSettled([loadBTC(),loadEUR()]);
+ if(results[0].status==='rejected')setStatus('btc','err','Could not load BTC data');
+ if(results[1].status==='rejected')setStatus('eur','err','Could not load EUR/USD data');
+ analyze();
+ btn.disabled=false;btn.textContent='Refresh live data & analysis';
+}
+document.getElementById('market').addEventListener('change',analyze);
+document.getElementById('size').addEventListener('input',e=>document.getElementById('sizeText').textContent=money(Number(e.target.value)));
+function trade(side){
+ const amount=Number(document.getElementById('size').value),key=document.getElementById('market').value;
+ if(amount>balance){alert('Not enough virtual balance.');return}
+ balance-=amount;trades++;
+ document.getElementById('balance').textContent=money(balance);document.getElementById('positions').textContent=trades;
+ const history=document.getElementById('history');if(trades===1)history.innerHTML='';
+ const item=document.createElement('div');item.className='trade';
+ const px=prices[key]?' · reference '+(key==='BTCUSD'?'$'+fmt(prices[key],2):fmt(prices[key],5)):' · price unavailable';
+ item.innerHTML='<div class="row"><b>'+side+' · '+key+'</b><span>'+money(amount)+'</span></div><div class="small">Paper trade #'+trades+px+'</div>';
+ history.prepend(item);
+}
+function resetLab(){balance=10000;trades=0;document.getElementById('balance').textContent=money(balance);document.getElementById('positions').textContent='0';document.getElementById('history').innerHTML='<div class="small">No paper trades yet.</div>'}
+loadAll();
+</script>
+</body></html>
