@@ -84,7 +84,7 @@ function analyze(){
 async function getJSON(url){const r=await fetch(url,{cache:'no-store'});if(!r.ok)throw new Error('HTTP '+r.status);return r.json()}
 async function loadBTC(){
  setStatus('btc','wait','Fetching hourly candles…');
- const d=await getJSON('https://api.binance.com/api/v3/klines?symbol=BTCUSDT&interval=1h&limit=250');
+ const d=await getJSON('https://data-api.binance.vision/api/v3/klines?symbol=BTCUSDT&interval=1h&limit=250');
  series.BTCUSD=d.map(x=>Number(x[4]));
  prices.BTCUSD=Number(d[d.length-1][4]);
  document.getElementById('btc').textContent='$'+fmt(prices.BTCUSD,2);
@@ -95,7 +95,7 @@ async function loadEUR(){
  setStatus('eur','wait','Fetching daily reference rates…');
  const end=new Date(),start=new Date(Date.now()-260*86400000);
  const iso=d=>d.toISOString().slice(0,10);
- const url='https://api.frankfurter.app/'+iso(start)+'..'+iso(end)+'?from=EUR&to=USD';
+ const url='https://api.frankfurter.dev/v1/'+iso(start)+'..'+iso(end)+'?base=EUR&symbols=USD';
  const d=await getJSON(url);
  const dates=Object.keys(d.rates).sort();
  series.EURUSD=dates.map(k=>Number(d.rates[k].USD));
