@@ -2,33 +2,35 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>NEXUS AI - Candle Core Test</title>
+  <title>NEXUS AI V2.0 Test</title>
 </head>
 <body>
   <h1>NEXUS AI V2.0</h1>
-  <h2>Candle Core Test</h2>
-
-  <pre id="result">Testing...</pre>
+  <h2>Candle Core Diagnostic</h2>
+  <pre id="result">Starting test...</pre>
 
   <script type="module">
-    import { validateCandle, analyzeCandle }
-      from './engine.js';
+    const output = document.getElementById("result");
 
-    const candle = {
-      open: 100,
-      high: 110,
-      low: 95,
-      close: 108,
-      volume: 500
-    };
+    try {
+      const engine = await import("./engine.js");
 
-    const result = {
-      valid: validateCandle(candle),
-      analysis: analyzeCandle(candle)
-    };
+      const candle = {
+        open: 100,
+        high: 110,
+        low: 95,
+        close: 108,
+        volume: 500
+      };
 
-    document.getElementById('result').textContent =
-      JSON.stringify(result, null, 2);
+      output.textContent = JSON.stringify({
+        valid: engine.validateCandle(candle),
+        analysis: engine.analyzeCandle(candle)
+      }, null, 2);
+
+    } catch (error) {
+      output.textContent = "ERROR: " + error.message;
+    }
   </script>
 </body>
 </html>
