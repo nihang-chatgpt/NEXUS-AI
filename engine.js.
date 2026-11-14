@@ -1,0 +1,55 @@
+
+// NEXUS AI V2.0
+// CANDLE CORE — MODULE 1
+
+export function validateCandle(c) {
+  const values = [
+    c.open,
+    c.high,
+    c.low,
+    c.close,
+    c.volume
+  ];
+
+  if (!values.every(Number.isFinite)) {
+    return false;
+  }
+
+  return (
+    c.high >= Math.max(c.open, c.close) &&
+    c.low <= Math.min(c.open, c.close) &&
+    c.high >= c.low &&
+    c.volume >= 0
+  );
+}
+
+export function analyzeCandle(c) {
+  if (!validateCandle(c)) {
+    throw new Error("Invalid candle data");
+  }
+
+  const body = Math.abs(c.close - c.open);
+  const range = c.high - c.low;
+
+  const upperWick =
+    c.high - Math.max(c.open, c.close);
+
+  const lowerWick =
+    Math.min(c.open, c.close) - c.low;
+
+  return {
+    direction:
+      c.close > c.open ? "BULLISH" :
+      c.close < c.open ? "BEARISH" :
+      "NEUTRAL",
+
+    body,
+    range,
+    upperWick,
+    lowerWick,
+
+    bodyRatio: range ? body / range : 0,
+    upperWickRatio: range ? upperWick / range : 0,
+    lowerWickRatio: range ? lowerWick / range : 0
+  };
+}
